@@ -16,9 +16,15 @@ class User extends Model
 
     // 挿入または更新を許可するフィールド
     protected $allowedFields = [
-        'username',
-        'email',
-        'password',
+        'username', // これが含まれているか
+        'email',    // (ログインメールは更新しないかもしれないが念のため)
+        'password', // (パスワードは別で更新するべき)
+        'bio',      // これが含まれているか
+        'faculty',  // これが含まれているか
+        'department', // これが含まれているか
+        'grade',    // これが含まれているか
+        'major_subject', // これが含まれているか
+        'profile_image' // これが含まれているか
     ];
 
     // タイムスタンプを自動的に管理するかどうか
