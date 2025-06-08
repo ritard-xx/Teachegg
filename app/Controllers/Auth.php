@@ -66,10 +66,82 @@ class Auth extends BaseController
             session()->setFlashdata('error', 'ユーザー登録に失敗しました。もう一度お試しください。');
             return redirect()->back()->withInput();
         }
+    }
 
-        // ここにユーザー登録処理のロジックを実装します。
-        // 今はまだ空の状態です。
-        echo "ユーザー登録処理を実行します。";
-        return $this->response->setStatusCode(ResponseInterface::HTTP_OK);
+        /**
+         * ログインフォームを表示します。
+         *
+         * @return string
+         */
+        public function login()
+        {
+            // ログインフォームのビューをロードして表示します。
+            // ビューファイルは app/Views/auth/login.php に作成します。
+            return view('auth/login');
+        }
+
+        /**
+     * ログインフォームからのデータを受け取り、処理します。
+     *
+     * @return ResponseInterface
+     */
+    public function processLogin()
+    {
+        // 1. ヘルパーをロード
+        helper(['form', 'url']);
+
+        // 2. バリデーションルールの定義
+        $rules = [
+            'email'    => 'required|valid_email',
+            'password' => 'required',
+        ];
+
+        // 3. 入力データのバリデーション実行
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // 4. 認証処理
+        $userModel = new User();
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
+
+        // メールアドレスでユーザーを検索
+        $user = $userModel->where('email', $email)->first();
+
+        // ユーザーが見つかり、かつパスワードが一致する場合
+        if ($user && password_verify($password, $user['password'])) {
+            // ログイン成功: セッションにユーザー情報を保存
+            // CodeIgniter 4 のセッションは $session = session(); で取得
+            $session = session();
+            $session->set([
+                'isLoggedIn' => true,
+                'userId'     => $user['id'],
+                'username'   => $user['username'],
+                'email'      => $user['email'],
+                // 必要に応じて他のユーザー情報もセッションに保存
+            ]);
+
+            session()->setFlashdata('success', 'ログインしました！');
+            return redirect()->to('/'); // ログイン成功後のリダイレクト先 (例: トップページやダッシュボード)
+        } else {
+            // ログイン失敗
+            session()->setFlashdata('error', 'メールアドレスまたはパスワードが正しくありません。');
+            return redirect()->back()->withInput();
+        }
+    }
+
+    /**
+     * ログアウト処理を行います。
+     *
+     * @return ResponseInterface
+     */
+    public function logout()
+    {
+        $session = session();
+        $session->destroy(); // セッションを破棄
+
+        session()->setFlashdata('success', 'ログアウトしました。');
+        return redirect()->to('/login'); // ログアウト後のリダイレクト先 (例: ログインページ)
     }
 }
