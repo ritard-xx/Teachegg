@@ -22,3 +22,4 @@ $routes->post('user/update', 'User::processProfileUpdate'); // プロフィー�
 $routes->get('posts', 'Post::index'); // 投稿一覧表示
 $routes->get('posts/create', 'Post::create'); // 投稿フォーム表示
 $routes->post('posts/create', 'Post::processCreate'); // 投稿作成処理
+$routes->get('posts/delete/(:num)', 'Post::delete/$1'); // 削除ルートを追加

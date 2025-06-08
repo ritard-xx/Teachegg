@@ -105,6 +105,24 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        .post-actions {
+            margin-top: 10px;
+            text-align: right; /* 右寄せにする場合 */
+        }
+        .post-actions a {
+            background-color: #dc3545; /* 赤色の削除ボタン */
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            margin-left: 10px; /* 複数のボタンがある場合に間隔を空ける */
+        }
+        .post-actions a:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -148,6 +166,18 @@
                     </div>
                     <div class="post-footer">
                         投稿日時: <?= esc($post['created_at']) ?>
+                        <?php
+                            // 現在ログインしているユーザーのIDを取得
+                            $loggedInUserId = session()->get('userId');
+                            // 投稿のuser_id と ログインユーザーIDが一致する場合にのみ削除ボタンを表示
+                            if ($loggedInUserId === $post['user_id']):
+                        ?>
+                            <div class="post-actions">
+                                <a href="<?= url_to('Post::delete', $post['id']) ?>"
+                                   onclick="return confirm('本当にこの投稿を削除しますか？');"
+                                >削除</a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>

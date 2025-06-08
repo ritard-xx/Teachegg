@@ -114,4 +114,47 @@ class Post extends BaseController
 
         return view('post/index', ['posts' => $posts]);
     }
+
+    /**
+     * 指定されたIDの投稿を削除します。
+     *
+     * @param int $id 削除する投稿のID
+     * @return ResponseInterface
+     */
+    public function delete(int $id)
+    {
+        $postModel = new PostModel();
+        $loggedInUserId = session()->get('userId');
+
+        // 1. 投稿を取得し、存在するか確認
+        $post = $postModel->find($id);
+
+        if (! $post) {
+            session()->setFlashdata('error', '投稿が見つかりませんでした。');
+            return redirect()->to(url_to('Post::index'));
+        }
+
+        // 2. ログインユーザーが投稿の所有者であるか確認
+        if ($post['user_id'] !== $loggedInUserId) {
+            session()->setFlashdata('error', 'この投稿を削除する権限がありません。');
+            return redirect()->to(url_to('Post::index'));
+        }
+
+        // 3. 関連する画像ファイルがあれば削除
+        if (!empty($post['image'])) {
+            $imagePath = FCPATH . 'uploads/posts/' . $post['image'];
+            if (file_exists($imagePath) && ! is_dir($imagePath)) {
+                unlink($imagePath); // ファイルを削除
+            }
+        }
+
+        // 4. データベースから投稿を削除 (ソフトデリート)
+        if ($postModel->delete($id)) { // useSoftDeletesがtrueなので、deleted_atが更新される
+            session()->setFlashdata('success', '投稿が正常に削除されました。');
+        } else {
+            session()->setFlashdata('error', '投稿の削除に失敗しました。');
+        }
+
+        return redirect()->to(url_to('Post::index'));
+    }
 }
