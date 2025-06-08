@@ -18,3 +18,7 @@ $routes->get('user', 'User::index'); // プロフィール表示
 $routes->get('user/edit', 'User::edit'); // プロフィール編集フォーム表示
 $routes->post('user/update', 'User::processProfileUpdate'); // プロフィール更新処理
 
+// 投稿関連のルート
+$routes->get('posts', 'Post::index'); // 投稿一覧表示
+$routes->get('posts/create', 'Post::create'); // 投稿フォーム表示
+$routes->post('posts/create', 'Post::processCreate'); // 投稿作成処理
